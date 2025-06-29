@@ -1,0 +1,6 @@
+# Ignorar arquivo real de variáveis
+.env
+
+# Ignorar pastas de backup
+/backups/
+/scripts/backups/
