@@ -22,18 +22,18 @@ fi
 command -v mongodump >/dev/null 2>&1 \
   || { echo >&2 "❌ mongodump não encontrado. Instale o Database Tools."; exit 1; }
 
-# 2) timestamp e diretório
-TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
-
-# 3) Argumentos (coleções)
+# 2) Argumentos (coleções)
 if [ $# -lt 1 ]; then
   echo "Uso: $0 <coleção1> [coleção2 ...]"
   exit 1
 fi
 
+# 3) timestamp e diretório
+TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
+
 # 4) Diretórios
 BASE_BACKUP_DIR="${BACKUP_DIR:-$(pwd)/backups}"
-OUT_BACKUP="$BASE_BACKUP_DIR/$TIMESTAMP"
+OUT_BACKUP="$BASE_BACKUP_DIR/$TIMESTAMP/$DB_NAME_DUMP"
 mkdir -p "$OUT_BACKUP"
 
 LOG_DIR="$(pwd)/logs"
@@ -44,15 +44,15 @@ LOG_FILE="$LOG_DIR/$TIMESTAMP.log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "🔄 Iniciando backup em: $OUT_BACKUP"
-echo "    Banco:    $DB_NAME"
+echo "    Banco:    $DB_NAME_DUMP"
 echo "    Coleções: $*"
 
 # 6) Loop de dump
 for coll in "$@"; do
   echo "  • Dump da coleção '$coll'…"
   mongodump \
-    --uri="$MONGO_URI" \
-    --db="$DB_NAME" \
+    --uri="$MONGO_URI_DUMP" \
+    --db="$DB_NAME_DUMP" \
     --collection="$coll" \
     --gzip \
     --archive="$OUT_BACKUP/${coll}.gz"
